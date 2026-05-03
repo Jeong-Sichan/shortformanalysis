@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>숏폼과 집중력 연구</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Gmarket+Sans:wght@300;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#FFFBF5; --surface:#FFF; --primary:#FF6B35; --primary-light:#FFF0EB; --primary-dark:#E85520;
+  --secondary:#2D3A4A; --accent:#FFD166; --text:#1A1A2E; --text-muted:#6B7280;
+  --border:#E8E0D8; --success:#10B981; --danger:#EF4444;
+  --radius:20px; --radius-sm:12px; --shadow:0 4px 24px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+.screen{display:none;min-height:100vh;padding:24px 20px 52px;max-width:560px;margin:0 auto;animation:fadeIn .35s ease}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:26px}
+.logo{font-family:'Gmarket Sans',sans-serif;font-size:17px;font-weight:700;color:var(--primary)}
+.step-pill{font-size:12px;color:var(--text-muted);background:var(--surface);padding:5px 12px;border-radius:20px;border:1px solid var(--border)}
+.prog-bar{height:6px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:26px}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:10px;transition:width .5s ease}
+.screen-title{font-family:'Gmarket Sans',sans-serif;font-size:23px;font-weight:700;line-height:1.35;margin-bottom:10px}
+.hl{color:var(--primary)}
+.screen-sub{font-size:14px;color:var(--text-muted);line-height:1.75}
+.card{background:var(--surface);border-radius:var(--radius);padding:22px 18px;box-shadow:var(--shadow);margin-bottom:13px}
+.divider{height:1px;background:var(--border);margin:18px 0}
+.btn{display:block;width:100%;padding:16px;border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;text-align:center}
+.btn-primary{background:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-dark);transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,107,53,.3)}
+.btn-primary:active{transform:translateY(0)}
+.btn-primary:disabled{background:#CBD5E1;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-accent{background:var(--accent);color:var(--text)}
+.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}
+
+/* 인트로 */
+.intro-badge{display:inline-flex;align-items:center;gap:6px;background:var(--primary-light);color:var(--primary);padding:5px 13px;border-radius:20px;font-size:13px;font-weight:700;margin-bottom:16px}
+.istep{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;background:var(--surface);border-radius:var(--radius-sm);box-shadow:var(--shadow);margin-bottom:9px}
+.istep-num{width:32px;height:32px;min-width:32px;border-radius:50%;background:var(--primary);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px}
+.istep-text{font-size:13px;line-height:1.55}
+.istep-text strong{display:block;font-size:14px;margin-bottom:1px}
+.notice-box{background:#FFF8E8;border:2px solid var(--accent);border-radius:var(--radius-sm);padding:13px 15px;margin:14px 0}
+.notice-box p{font-size:14px;line-height:1.7;color:#7A5800}
+.agree-box{display:flex;align-items:flex-start;gap:11px;padding:13px 14px;background:var(--primary-light);border-radius:var(--radius-sm);margin:14px 0;cursor:pointer}
+.agree-box input{width:20px;height:20px;min-width:20px;accent-color:var(--primary);margin-top:2px;cursor:pointer}
+.agree-box label{font-size:13px;line-height:1.6;cursor:pointer}
+.age-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.age-btn{padding:15px 10px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:15px;font-weight:500;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .2s;color:var(--text)}
+.age-btn:hover{border-color:var(--primary);color:var(--primary)}
+.age-btn.selected{border-color:var(--primary);background:var(--primary-light);color:var(--primary);font-weight:700}
+
+/* 테스트 공통 */
+.phase-badge{display:inline-block;font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:13px}
+.phase-pre{background:#E6F1FB;color:#0C447C}
+.phase-post{background:#E1F5EE;color:#085041}
+.test-dots{display:flex;gap:7px;margin-bottom:18px}
+.tdot{flex:1;height:5px;border-radius:10px;background:var(--border);transition:background .3s}
+.tdot.done{background:var(--primary)}
+.tdot.active{background:var(--accent)}
+
+/* 스트루프 */
+.stroop-word{font-family:'Gmarket Sans',sans-serif;font-size:60px;font-weight:700;text-align:center;padding:36px 16px;border-radius:var(--radius);background:var(--secondary);margin-bottom:14px;letter-spacing:2px}
+.stroop-q{text-align:center;font-size:14px;color:var(--text-muted);margin-bottom:12px}
+.stroop-choices{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:10px}
+.sc-btn{padding:17px 8px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:17px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .15s;background:var(--surface)}
+.sc-btn:active{transform:scale(.94)}
+.sc-btn.correct{background:#D1FAE5;border-color:var(--success);color:#065F46}
+.sc-btn.wrong{background:#FEE2E2;border-color:var(--danger);color:#991B1B}
+.stimer-bar{height:5px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.stimer-fill{height:100%;background:var(--primary);border-radius:10px;transition:width .1s linear}
+.sprogress{text-align:center;font-size:13px;color:var(--text-muted);margin-bottom:9px}
+.big-result{text-align:center;padding:24px 0}
+.big-num{font-family:'Gmarket Sans',sans-serif;font-size:54px;font-weight:700;color:var(--primary)}
+.big-label{font-size:13px;color:var(--text-muted)}
+
+/* 숫자 거꾸로 */
+.digit-display{font-family:'Gmarket Sans',sans-serif;font-size:48px;font-weight:700;text-align:center;letter-spacing:8px;padding:32px 14px;background:var(--secondary);border-radius:var(--radius);color:#fff;margin-bottom:14px}
+.digit-countdown{font-family:'Gmarket Sans',sans-serif;font-size:48px;font-weight:700;text-align:center;color:var(--accent);padding:16px 0}
+.digit-instruction{text-align:center;font-size:14px;color:var(--text-muted);margin-bottom:14px;line-height:1.6}
+.digit-input-row{display:flex;gap:7px;justify-content:center;flex-wrap:wrap;margin-bottom:13px}
+.dbox{width:42px;height:52px;border:2px solid var(--border);border-radius:var(--radius-sm);font-size:20px;font-weight:700;text-align:center;font-family:'Gmarket Sans',sans-serif;background:var(--surface);color:var(--text);display:flex;align-items:center;justify-content:center;transition:border-color .15s}
+.numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;max-width:280px;margin:0 auto}
+.np-btn{padding:15px;background:var(--surface);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:20px;font-weight:700;font-family:'Gmarket Sans',sans-serif;cursor:pointer;transition:all .15s;color:var(--text)}
+.np-btn:active{background:var(--primary-light);border-color:var(--primary);transform:scale(.94)}
+.np-btn.del{color:var(--danger)}
+.round-badge{display:inline-block;background:var(--primary-light);color:var(--primary);font-size:13px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:11px}
+
+/* 반응속도 */
+.react-area{position:relative;width:100%;height:340px;background:var(--secondary);border-radius:var(--radius);overflow:hidden;touch-action:none;margin-bottom:13px}
+.rtimer-bar{height:5px;background:var(--border);border-radius:10px;overflow:hidden;margin-bottom:9px}
+.rtimer-fill{height:100%;background:var(--primary);border-radius:10px;transition:width .1s linear}
+.rstats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.rstat{background:var(--surface);border-radius:var(--radius-sm);padding:11px 8px;text-align:center;box-shadow:var(--shadow)}
+.rstat-num{font-family:'Gmarket Sans',sans-serif;font-size:22px;font-weight:700;color:var(--primary)}
+.rstat-label{font-size:11px;color:var(--text-muted);margin-top:2px}
+.rtarget{position:absolute;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;animation:popIn .12s ease}
+@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}
+.rtarget:active{transform:scale(.84)}
+.rtarget-inner{width:38%;height:38%;border-radius:50%;background:#fff;pointer-events:none}
+.cd-overlay{position:absolute;inset:0;background:var(--secondary);display:flex;align-items:center;justify-content:center;flex-direction:column;border-radius:var(--radius);z-index:10}
+.cd-num{font-family:'Gmarket Sans',sans-serif;font-size:80px;font-weight:700;color:var(--primary);animation:countPop 1s ease}
+@keyframes countPop{0%{transform:scale(1.3);opacity:.5}100%{transform:scale(1);opacity:1}}
+.cd-sub{font-size:14px;color:rgba(255,255,255,.6);margin-top:8px}
+.timer-ring{position:absolute;top:13px;left:50%;transform:translateX(-50%);background:rgba(255,255,255,.15);color:#fff;padding:7px 18px;border-radius:20px;font-size:16px;font-weight:700}
+
+/* 영상 */
+.video-container{position:relative;width:100%;height:75vh;background:#000;border-radius:var(--radius);overflow:hidden;margin-bottom:14px}
+.video-container video{width:100%;height:100%;object-fit:contain;background:#000}
+.video-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:13px;pointer-events:none}
+.video-top{display:flex;justify-content:space-between;align-items:center}
+.vid-badge{background:rgba(0,0,0,.6);color:#fff;padding:5px 12px;border-radius:20px;font-size:13px;font-weight:500}
+.video-bottom{pointer-events:all}
+.vid-prog{height:4px;background:rgba(255,255,255,.25);border-radius:4px;margin-bottom:9px;overflow:hidden}
+.vid-prog-fill{height:100%;background:var(--primary);border-radius:4px;transition:width .1s linear}
+.btn-skip{display:block;width:100%;padding:14px;background:rgba(255,255,255,.95);color:var(--primary);border:none;border-radius:var(--radius-sm);font-size:16px;font-weight:700;font-family:'Noto Sans KR',sans-serif;cursor:pointer;backdrop-filter:blur(8px)}
+.vid-loading{position:absolute;inset:0;background:#111;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:11px;color:#fff}
+.spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,.2);border-top-color:var(--primary);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 설문 */
+.q-block{margin-bottom:22px}
+.q-label{font-size:14px;font-weight:700;line-height:1.5;margin-bottom:11px}
+.q-tag{display:inline-block;background:var(--primary);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;margin-right:6px;vertical-align:middle}
+.q-group-title{font-size:12px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.07em;margin-bottom:13px;padding-bottom:7px;border-bottom:2px solid var(--primary-light)}
+.choice-grid{display:flex;flex-direction:column;gap:7px}
+.choice-btn{display:flex;align-items:center;gap:10px;padding:12px 13px;background:var(--bg);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-family:'Noto Sans KR',sans-serif;cursor:pointer;transition:all .15s;color:var(--text);text-align:left}
+.choice-btn:hover{border-color:var(--primary);background:var(--primary-light)}
+.choice-btn.selected{border-color:var(--primary);background:var(--primary-light);color:var(--primary);font-weight:700}
+.cdot{width:17px;height:17px;min-width:17px;border-radius:50%;border:2px solid var(--border);transition:all .15s}
+.choice-btn.selected .cdot{background:var(--primary);border-color:var(--primary)}
+.likert-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-bottom:6px}
+.likert-btns{display:flex;gap:6px}
+.likert-btn{flex:1;padding:12px 4px;background:var(--bg);border:2px solid var(--border);border-radius:var(--radius-sm);font-size:14px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Noto Sans KR',sans-serif;color:var(--text-muted)}
+.likert-btn:hover{border-color:var(--primary);color:var(--primary)}
+.likert-btn.selected{border-color:var(--primary);background:var(--primary);color:#fff}
+.slider-val{text-align:center;font-family:'Gmarket Sans',sans-serif;font-size:42px;font-weight:700;color:var(--primary);margin-bottom:7px;line-height:1}
+.slider-val span{font-size:15px;color:var(--text-muted)}
+.addiction-slider{width:100%;accent-color:var(--primary);cursor:pointer}
+.slider-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:6px}
+.slider-desc{text-align:center;font-size:13px;font-weight:500;margin-top:9px;padding:6px 12px;border-radius:20px;transition:all .2s}
+
+/* 완료 */
+.result-hero{text-align:center;padding:26px 0 18px}
+.result-emoji{font-size:58px;display:block;margin-bottom:12px}
+.result-title{font-family:'Gmarket Sans',sans-serif;font-size:26px;font-weight:700;margin-bottom:8px}
+.result-sub{font-size:14px;color:var(--text-muted);line-height:1.7}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:13px 0}
+.compare-card{background:var(--surface);border-radius:var(--radius-sm);padding:13px 10px;text-align:center;box-shadow:var(--shadow)}
+.compare-label{font-size:11px;color:var(--text-muted);margin-bottom:5px}
+.compare-vals{display:flex;gap:5px;justify-content:center;align-items:baseline}
+.c-before{font-size:13px;color:var(--text-muted)}
+.c-after{font-family:'Gmarket Sans',sans-serif;font-size:21px;font-weight:700;color:var(--primary)}
+.c-arr{font-size:11px;color:var(--text-muted)}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--secondary);color:#fff;padding:11px 22px;border-radius:20px;font-size:13px;font-weight:500;transition:transform .3s ease;z-index:9999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="toast" id="toast"></div>
+
+<!-- ===== 인트로 ===== -->
+<div class="screen active" id="s-intro">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill">시작</div></div>
+  <div class="intro-badge">🎓 대학교 데이터 분석 연구</div>
+  <div style="background:linear-gradient(135deg,#FF6B35,#FFD166);border-radius:20px;padding:22px 20px;margin-bottom:16px;text-align:center">
+    <p style="font-size:13px;color:rgba(255,255,255,.85);font-weight:500;margin-bottom:6px">숏폼을 본 후</p>
+    <p style="font-family:'Gmarket Sans',sans-serif;font-size:26px;font-weight:700;color:#fff;line-height:1.3;margin-bottom:4px">당신의 집중력 점수는?</p>
+    <p style="font-size:13px;color:rgba(255,255,255,.85)">틱톡 · 릴스 · 쇼츠 시청 전후 집중력 비교 실험</p>
+  </div>
+  <div style="background:#FF6B35;border-radius:16px;padding:16px 18px;margin-bottom:16px;text-align:center">
+    <p style="font-size:15px;font-weight:700;color:#fff;line-height:1.8">
+      📱 반드시 읽어주세요!<br>
+      <span style="font-size:14px;font-weight:500">영상 시청 구간에서는 평소에<br><strong>틱톡 · 릴스 · 쇼츠</strong>를 보듯이<br>자연스럽게 시청해주세요!</span>
+    </p>
+  </div>
+  <p class="screen-sub" style="margin:0 0 14px">약 12~15분 소요돼요. 모든 데이터는 익명 처리됩니다.</p>
+  <div class="istep"><div class="istep-num">1</div><div class="istep-text"><strong>🎯 사전 집중력 테스트</strong>숏폼 시청 전 집중력을 먼저 측정해요 (3종)</div></div>
+  <div class="istep"><div class="istep-num">2</div><div class="istep-text"><strong>📱 숏폼 시청 (12개 영상)</strong>평소처럼 자유롭게 보고 넘기면 돼요</div></div>
+  <div class="istep"><div class="istep-num">3</div><div class="istep-text"><strong>🎯 사후 집중력 테스트</strong>시청 후 집중력을 다시 측정해요 (3종)</div></div>
+  <div class="istep"><div class="istep-num">4</div><div class="istep-text"><strong>📝 설문조사 (15문항)</strong>평소 미디어 이용 습관에 관한 질문이에요</div></div>
+  <div class="card" style="background:var(--primary-light);box-shadow:none;border:2px solid #FFD0C0;margin-top:4px">
+    <p style="font-size:13px;color:#994422;line-height:1.7">🔒 <strong>개인정보 보호</strong><br>이름·연락처는 수집하지 않으며, 학술 연구 목적으로만 사용됩니다.</p>
+  </div>
+  <label class="agree-box" for="agree-check">
+    <input type="checkbox" id="agree-check" onchange="G.agreed=this.checked; chkReady();">
+    <span>위 내용을 읽었으며 연구 참여에 동의합니다.</span>
+  </label>
+  <p style="font-size:14px;font-weight:700;margin:14px 0 10px">나이대를 선택해주세요</p>
+  <div class="age-grid">
+    <button class="age-btn" onclick="selectAge(this,'10대')">10대</button>
+    <button class="age-btn" onclick="selectAge(this,'20대')">20대</button>
+    <button class="age-btn" onclick="selectAge(this,'30~40대')">30~40대</button>
+    <button class="age-btn" onclick="selectAge(this,'50대 이상')">50대 이상</button>
+  </div>
+  <button class="btn btn-primary mt8" id="start-btn" disabled onclick="startApp()">실험 시작하기 →</button>
+</div>
+
+<!-- ===== 테스트 허브 ===== -->
+<div class="screen" id="s-hub">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill" id="hub-pill"></div></div>
+  <div class="prog-bar"><div class="prog-fill" id="hub-prog" style="width:0%"></div></div>
+  <div class="phase-badge" id="hub-badge"></div>
+  <div class="screen-title" id="hub-title"></div>
+  <p class="screen-sub" id="hub-sub" style="margin:10px 0 18px"></p>
+  <div class="test-dots"><div class="tdot" id="td0"></div><div class="tdot" id="td1"></div><div class="tdot" id="td2"></div></div>
+  <div id="hub-stroop-tip" style="display:none;margin-bottom:16px">
+    <div style="background:#2D3A4A;border-radius:16px;padding:20px;text-align:center;margin-bottom:12px">
+      <div style="font-family:Gmarket Sans,sans-serif;font-size:48px;font-weight:700;color:#EF4444;letter-spacing:2px;margin-bottom:8px">파랑</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.6)">이 글자의 색깔은? → <strong style="color:#FFD166">빨강 ✓</strong></div>
+    </div>
+    <div style="background:#FFF8E8;border:2px solid #FFD166;border-radius:12px;padding:14px 16px">
+      <p style="font-size:14px;color:#7A5800;line-height:1.7;font-weight:500">⚠️ <strong>글자 내용이 아닌, 글자의 색깔을 선택하세요!</strong><br><span style="font-size:13px;font-weight:400">위 예시에서 글자는 파랑이지만 색깔은 빨강이에요. 문제당 2초 안에 골라야 해요.</span></p>
+    </div>
+  </div>
+  <div id="hub-digit-tip" style="display:none;margin-bottom:16px">
+    <div style="background:#2D3A4A;border-radius:16px;padding:20px;text-align:center;margin-bottom:12px">
+      <div style="font-family:'Gmarket Sans',sans-serif;font-size:42px;font-weight:700;color:#fff;letter-spacing:10px;margin-bottom:12px">3 8 1 5 2 7</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:8px">
+        <span style="font-size:13px;color:rgba(255,255,255,0.5)">4초 후 사라짐</span>
+      </div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:8px">↓ 거꾸로 입력</div>
+      <div style="display:flex;gap:6px;justify-content:center">
+        <div style="width:38px;height:46px;background:#FF6B35;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Gmarket Sans',sans-serif;font-size:20px;font-weight:700;color:#fff">7</div>
+        <div style="width:38px;height:46px;background:#FF6B35;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Gmarket Sans',sans-serif;font-size:20px;font-weight:700;color:#fff">2</div>
+        <div style="width:38px;height:46px;background:#FF6B35;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Gmarket Sans',sans-serif;font-size:20px;font-weight:700;color:#fff">5</div>
+        <div style="width:38px;height:46px;background:#FF6B35;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Gmarket Sans',sans-serif;font-size:20px;font-weight:700;color:#fff">1</div>
+        <div style="width:38px;height:46px;background:#FF6B35;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Gmarket Sans',sans-serif;font-size:20px;font-weight:700;color:#fff">8</div>
+        <div style="width:38px;height:46px;background:#FF6B35;border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Gmarket Sans',sans-serif;font-size:20px;font-weight:700;color:#fff">3</div>
+      </div>
+    </div>
+    <div style="background:#FFF8E8;border:2px solid #FFD166;border-radius:12px;padding:14px 16px">
+      <p style="font-size:14px;color:#7A5800;line-height:1.7;font-weight:500">⚠️ <strong>숫자를 거꾸로 입력하세요!</strong><br><span style="font-size:13px;font-weight:400">숫자를 3초간 보여준 뒤 사라져요.<br>마지막 숫자부터 첫 번째 숫자 순서로 입력하면 돼요.<br>총 2라운드 진행해요.</span></p>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="startCurrentTest()">테스트 시작 →</button>
+</div>
+
+<!-- ===== 스트루프 ===== -->
+<div class="screen" id="s-stroop">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill" id="stroop-pill"></div></div>
+  <div class="phase-badge" id="stroop-badge"></div>
+  <div class="screen-title" style="font-size:20px;margin-bottom:6px">스트루프 테스트</div>
+  <p class="screen-sub" style="margin-bottom:12px;font-size:13px" id="stroop-inst">글자의 <strong>색깔</strong>을 선택하세요. 글자 내용이 아니에요!</p>
+  <div class="sprogress" id="sprogress">1 / 5</div>
+  <div class="stimer-bar"><div class="stimer-fill" id="stimer-fill" style="width:100%"></div></div>
+  <div class="stroop-word" id="stroop-word">빨강</div>
+  <div class="stroop-q" id="stroop-q">이 글자의 <strong>색깔</strong>은?</div>
+  <div class="stroop-choices" id="stroop-choices"></div>
+  <div id="stroop-done" style="display:none">
+    <div class="big-result"><div class="big-num" id="stroop-score">0/5</div><div class="big-label">정답</div></div>
+    <button class="btn btn-primary" onclick="finishTest()">다음 테스트 →</button>
+  </div>
+</div>
+
+<!-- ===== 숫자 거꾸로 ===== -->
+<div class="screen" id="s-digit">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill" id="digit-pill"></div></div>
+  <div class="phase-badge" id="digit-badge"></div>
+  <div class="screen-title" style="font-size:20px;margin-bottom:6px">숫자 거꾸로 세기</div>
+  <div class="round-badge" id="round-badge">1 / 2 라운드</div>
+  <div id="digit-memo">
+    <p class="screen-sub" style="margin-bottom:12px;font-size:13px">아래 숫자를 <strong>5초</strong> 동안 기억하세요!</p>
+    <div class="digit-display" id="digit-display">― ― ― ― ― ―</div>
+    <div class="digit-countdown" id="digit-cd">3</div>
+  </div>
+  <div id="digit-input" style="display:none">
+    <p class="digit-instruction">기억한 숫자를 <strong>거꾸로</strong> 입력하세요<br><span style="font-size:12px;color:var(--text-muted)">(예: 1 2 3 → 3 2 1)</span></p>
+    <div class="digit-input-row" id="digit-row"></div>
+    <div class="numpad" id="numpad"></div>
+    <button class="btn btn-primary mt16" onclick="submitDigit()">확인 →</button>
+  </div>
+  <div id="digit-done" style="display:none">
+    <div class="big-result"><div class="big-num" id="digit-total">0/12</div><div class="big-label">숫자 맞힘</div></div>
+    <button class="btn btn-primary" onclick="finishTest()">다음 테스트 →</button>
+  </div>
+</div>
+
+<!-- ===== 반응속도 ===== -->
+<div class="screen" id="s-react">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill" id="react-pill"></div></div>
+  <div class="phase-badge" id="react-badge"></div>
+  <div class="screen-title" style="font-size:20px;margin-bottom:6px">반응속도 테스트</div>
+  <p class="screen-sub" style="margin-bottom:11px;font-size:13px">나타나는 원을 <strong>최대한 빠르게</strong> 터치하세요!<br>여러 개가 동시에 나타날 수 있어요.</p>
+  <div class="rstats">
+    <div class="rstat"><div class="rstat-num" id="r-hit">0</div><div class="rstat-label">성공</div></div>
+    <div class="rstat"><div class="rstat-num" id="r-miss">0</div><div class="rstat-label">놓침</div></div>
+    <div class="rstat"><div class="rstat-num" id="r-time">10</div><div class="rstat-label">남은 시간</div></div>
+  </div>
+  <div class="rtimer-bar"><div class="rtimer-fill" id="rtimer-fill" style="width:100%"></div></div>
+  <div class="react-area" id="react-area">
+    <div class="cd-overlay" id="r-cd"><div class="cd-num" id="r-cd-num">3</div><div class="cd-sub">준비하세요!</div></div>
+    <div id="react-done" style="display:none;position:absolute;inset:0;background:rgba(45,58,74,0.97);border-radius:20px;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:24px">
+      <div style="text-align:center">
+        <div style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:6px">테스트 완료!</div>
+        <div class="big-num" id="r-done-hit" style="color:#FF6B35;font-size:56px">0</div>
+        <div style="font-size:14px;color:rgba(255,255,255,0.7);margin-top:4px">성공 / <span id="r-done-total">0</span> 시도</div>
+      </div>
+      <button class="btn btn-primary" style="width:220px" onclick="finishTest()">계속하기 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 영상 시청 ===== -->
+<div class="screen" id="s-video">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill">영상 시청</div></div>
+  <div class="prog-bar"><div class="prog-fill" id="vid-prog-bar" style="width:0%"></div></div>
+  <div class="notice-box" style="margin-bottom:13px">
+    <p>📱 <strong>평소에 숏폼을 보듯이 자연스럽게 시청하고 스킵해주세요!</strong><br>보고 싶으면 끝까지 봐도 되고, 지루하면 바로 넘겨도 돼요. 평소 습관 그대로!</p>
+  </div>
+  <div class="video-container">
+    <div class="vid-loading" id="vid-loading"><div class="spinner"></div><p style="font-size:13px">영상 불러오는 중...</p></div>
+    <video id="main-video" playsinline autoplay style="display:none" oncanplay="onVideoReady()"></video>
+    <div class="video-overlay">
+      <div class="video-top"><div class="vid-badge" id="vid-badge">1 / 12</div></div>
+      <div class="video-bottom">
+        <div class="vid-prog"><div class="vid-prog-fill" id="vid-pfill" style="width:0%"></div></div>
+        <button class="btn-skip" onclick="skipVideo()">다음 영상 →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 설문 ===== -->
+<div class="screen" id="s-survey">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill">설문</div></div>
+  <div class="prog-bar"><div class="prog-fill" id="survey-prog" style="width:0%"></div></div>
+  <div class="screen-title" style="font-size:20px;margin-bottom:16px">📝 설문조사</div>
+
+  <div class="card">
+    <div class="q-group-title">A. 숏폼 이용 습관</div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q1</span>하루 평균 숏폼을 얼마나 보나요?</div>
+      <div class="choice-grid" id="q1">
+        <button class="choice-btn" onclick="pick('q1',this,'10분 미만')"><div class="cdot"></div>10분 미만</button>
+        <button class="choice-btn" onclick="pick('q1',this,'30분 미만')"><div class="cdot"></div>30분 미만</button>
+        <button class="choice-btn" onclick="pick('q1',this,'30분~1시간')"><div class="cdot"></div>30분~1시간</button>
+        <button class="choice-btn" onclick="pick('q1',this,'1~2시간')"><div class="cdot"></div>1~2시간</button>
+        <button class="choice-btn" onclick="pick('q1',this,'2시간 이상')"><div class="cdot"></div>2시간 이상</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q2</span>숏폼을 처음 사용하기 시작한 게 언제인가요?</div>
+      <div class="choice-grid" id="q2">
+        <button class="choice-btn" onclick="pick('q2',this,'1년 미만')"><div class="cdot"></div>1년 미만</button>
+        <button class="choice-btn" onclick="pick('q2',this,'1~2년')"><div class="cdot"></div>1~2년</button>
+        <button class="choice-btn" onclick="pick('q2',this,'2~3년')"><div class="cdot"></div>2~3년</button>
+        <button class="choice-btn" onclick="pick('q2',this,'3~5년')"><div class="cdot"></div>3~5년</button>
+        <button class="choice-btn" onclick="pick('q2',this,'5년 이상')"><div class="cdot"></div>5년 이상</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q3</span>숏폼을 주로 어떻게 보나요?</div>
+      <div class="choice-grid" id="q3">
+        <button class="choice-btn" onclick="pick('q3',this,'알고리즘 추천대로')"><div class="cdot"></div>알고리즘 추천대로 (수동적)</button>
+        <button class="choice-btn" onclick="pick('q3',this,'직접 검색해서')"><div class="cdot"></div>직접 검색해서 (능동적)</button>
+        <button class="choice-btn" onclick="pick('q3',this,'반반')"><div class="cdot"></div>반반</button>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block" style="margin-bottom:0">
+      <div class="q-label"><span class="q-tag">Q4</span>숏폼을 주로 보는 이유는?</div>
+      <div class="choice-grid" id="q4">
+        <button class="choice-btn" onclick="pick('q4',this,'심심해서')"><div class="cdot"></div>심심해서</button>
+        <button class="choice-btn" onclick="pick('q4',this,'정보 얻으려고')"><div class="cdot"></div>정보 얻으려고</button>
+        <button class="choice-btn" onclick="pick('q4',this,'스트레스 해소')"><div class="cdot"></div>스트레스 해소</button>
+        <button class="choice-btn" onclick="pick('q4',this,'습관적으로')"><div class="cdot"></div>습관적으로</button>
+        <button class="choice-btn" onclick="pick('q4',this,'기타')"><div class="cdot"></div>기타</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-block" style="margin-bottom:0">
+      <div class="q-label"><span class="q-tag">Q5</span>10분 이상 긴 콘텐츠를 하루 얼마나 보나요?</div>
+      <div class="choice-grid" id="q5">
+        <button class="choice-btn" onclick="pick('q5',this,'거의 안 봄')"><div class="cdot"></div>거의 안 봄</button>
+        <button class="choice-btn" onclick="pick('q5',this,'30분 미만')"><div class="cdot"></div>30분 미만</button>
+        <button class="choice-btn" onclick="pick('q5',this,'30분~1시간')"><div class="cdot"></div>30분~1시간</button>
+        <button class="choice-btn" onclick="pick('q5',this,'1시간 이상')"><div class="cdot"></div>1시간 이상</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-group-title">B. 집중력 자기평가</div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q6</span>공부나 업무 중 집중이 잘 유지되나요?</div>
+      <div class="likert-labels"><span>전혀 안 됨</span><span>매우 잘 됨</span></div>
+      <div class="likert-btns" id="q6"><button class="likert-btn" onclick="lk('q6',this,1)">1</button><button class="likert-btn" onclick="lk('q6',this,2)">2</button><button class="likert-btn" onclick="lk('q6',this,3)">3</button><button class="likert-btn" onclick="lk('q6',this,4)">4</button><button class="likert-btn" onclick="lk('q6',this,5)">5</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q7</span>책이나 긴 글을 읽을 때 집중이 잘 되나요?</div>
+      <div class="likert-labels"><span>전혀 안 됨</span><span>매우 잘 됨</span></div>
+      <div class="likert-btns" id="q7"><button class="likert-btn" onclick="lk('q7',this,1)">1</button><button class="likert-btn" onclick="lk('q7',this,2)">2</button><button class="likert-btn" onclick="lk('q7',this,3)">3</button><button class="likert-btn" onclick="lk('q7',this,4)">4</button><button class="likert-btn" onclick="lk('q7',this,5)">5</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q8</span>1~2년 전과 비교해 집중력이 달라진 것 같나요?</div>
+      <div class="likert-labels"><span>훨씬 나빠짐</span><span>오히려 좋아짐</span></div>
+      <div class="likert-btns" id="q8"><button class="likert-btn" onclick="lk('q8',this,1)">1</button><button class="likert-btn" onclick="lk('q8',this,2)">2</button><button class="likert-btn" onclick="lk('q8',this,3)">3</button><button class="likert-btn" onclick="lk('q8',this,4)">4</button><button class="likert-btn" onclick="lk('q8',this,5)">5</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block" style="margin-bottom:0">
+      <div class="q-label"><span class="q-tag">Q9</span>영상을 보다 스킵하고 싶어지는 데 보통 몇 초 걸리나요?</div>
+      <div class="choice-grid" id="q9">
+        <button class="choice-btn" onclick="pick('q9',this,'5초 이내')"><div class="cdot"></div>5초 이내</button>
+        <button class="choice-btn" onclick="pick('q9',this,'5~10초')"><div class="cdot"></div>5~10초</button>
+        <button class="choice-btn" onclick="pick('q9',this,'10~20초')"><div class="cdot"></div>10~20초</button>
+        <button class="choice-btn" onclick="pick('q9',this,'20~30초')"><div class="cdot"></div>20~30초</button>
+        <button class="choice-btn" onclick="pick('q9',this,'30초 이상')"><div class="cdot"></div>30초 이상</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-group-title">C. 중독 자기인식</div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q10</span>스스로 숏폼에 얼마나 중독되어 있다고 생각하나요?</div>
+      <div class="slider-val" id="slider-val">5 <span>/ 10점</span></div>
+      <input type="range" class="addiction-slider" min="0" max="10" value="5" oninput="updateSlider(this.value)">
+      <div class="slider-labels"><span>0 — 전혀 아님</span><span>10 — 완전 중독</span></div>
+      <div class="slider-desc" id="slider-desc"></div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block" style="margin-bottom:0">
+      <div class="q-label"><span class="q-tag">Q11</span>숏폼을 그만 보려고 해도 계속 보게 되는 편인가요?</div>
+      <div class="likert-labels"><span>전혀 그렇지 않다</span><span>매우 그렇다</span></div>
+      <div class="likert-btns" id="q11"><button class="likert-btn" onclick="lk('q11',this,1)">1</button><button class="likert-btn" onclick="lk('q11',this,2)">2</button><button class="likert-btn" onclick="lk('q11',this,3)">3</button><button class="likert-btn" onclick="lk('q11',this,4)">4</button><button class="likert-btn" onclick="lk('q11',this,5)">5</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-group-title">D. 수면 패턴</div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q12</span>밤 11시 이후 숏폼을 보는 빈도는?</div>
+      <div class="likert-labels"><span>거의 안 봄</span><span>매일 봄</span></div>
+      <div class="likert-btns" id="q12"><button class="likert-btn" onclick="lk('q12',this,1)">1</button><button class="likert-btn" onclick="lk('q12',this,2)">2</button><button class="likert-btn" onclick="lk('q12',this,3)">3</button><button class="likert-btn" onclick="lk('q12',this,4)">4</button><button class="likert-btn" onclick="lk('q12',this,5)">5</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block">
+      <div class="q-label"><span class="q-tag">Q13</span>잠들기 직전 숏폼을 보는 편인가요?</div>
+      <div class="likert-labels"><span>전혀 아님</span><span>매우 그렇다</span></div>
+      <div class="likert-btns" id="q13"><button class="likert-btn" onclick="lk('q13',this,1)">1</button><button class="likert-btn" onclick="lk('q13',this,2)">2</button><button class="likert-btn" onclick="lk('q13',this,3)">3</button><button class="likert-btn" onclick="lk('q13',this,4)">4</button><button class="likert-btn" onclick="lk('q13',this,5)">5</button></div>
+    </div>
+    <div class="divider"></div>
+    <div class="q-block" style="margin-bottom:0">
+      <div class="q-label"><span class="q-tag">Q14</span>최근 수면의 질에 만족하나요?</div>
+      <div class="likert-labels"><span>매우 불만족</span><span>매우 만족</span></div>
+      <div class="likert-btns" id="q14"><button class="likert-btn" onclick="lk('q14',this,1)">1</button><button class="likert-btn" onclick="lk('q14',this,2)">2</button><button class="likert-btn" onclick="lk('q14',this,3)">3</button><button class="likert-btn" onclick="lk('q14',this,4)">4</button><button class="likert-btn" onclick="lk('q14',this,5)">5</button></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="q-group-title">E. 기본 정보</div>
+    <div class="q-block" style="margin-bottom:0">
+      <div class="q-label"><span class="q-tag">Q15</span>성별 <span style="font-size:12px;color:var(--text-muted);font-weight:400">(선택)</span></div>
+      <div class="choice-grid" id="q15">
+        <button class="choice-btn" onclick="pick('q15',this,'남')"><div class="cdot"></div>남</button>
+        <button class="choice-btn" onclick="pick('q15',this,'여')"><div class="cdot"></div>여</button>
+        <button class="choice-btn" onclick="pick('q15',this,'기타')"><div class="cdot"></div>기타</button>
+        <button class="choice-btn" onclick="pick('q15',this,'응답 안 함')"><div class="cdot"></div>응답 안 함</button>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-primary mt8" onclick="submitSurvey()">제출하기 →</button>
+</div>
+
+<!-- ===== 완료 ===== -->
+<div class="screen" id="s-done">
+  <div class="top-bar"><div class="logo">숏폼 연구소</div><div class="step-pill">완료</div></div>
+  <div class="result-hero">
+    <span class="result-emoji">🎉</span>
+    <div class="result-title">참여 완료!</div>
+    <p class="result-sub">소중한 데이터 감사해요.<br>연구에 큰 도움이 됐어요!</p>
+  </div>
+  <div class="card" style="text-align:center;padding:28px 20px;margin-bottom:13px">
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:4px">당신의 집중력 점수는?</p>
+    <div style="font-family:Gmarket Sans,sans-serif;font-size:72px;font-weight:700;color:var(--primary);line-height:1" id="focus-score">-</div>
+    <div style="font-size:15px;color:var(--text-muted);margin-bottom:10px">/ 10점</div>
+    <div style="font-size:16px;font-weight:700;color:var(--text)" id="focus-grade"></div>
+    <div style="font-size:13px;color:var(--text-muted);margin-top:6px;line-height:1.6" id="focus-desc"></div>
+  </div>
+  <div class="card">
+    <p style="font-size:13px;font-weight:700;margin-bottom:11px">📊 집중력 변화 (시청 전 → 후)</p>
+    <div class="compare-grid">
+      <div class="compare-card"><div class="compare-label">스트루프 정답</div><div class="compare-vals"><span class="c-before" id="cs-pre">-</span><span class="c-arr"> → </span><span class="c-after" id="cs-post">-</span></div></div>
+      <div class="compare-card"><div class="compare-label">숫자 기억</div><div class="compare-vals"><span class="c-before" id="cd-pre">-</span><span class="c-arr"> → </span><span class="c-after" id="cd-post">-</span></div></div>
+      <div class="compare-card"><div class="compare-label">반응 성공</div><div class="compare-vals"><span class="c-before" id="cr-pre">-</span><span class="c-arr"> → </span><span class="c-after" id="cr-post">-</span></div></div>
+      <div class="compare-card"><div class="compare-label">평균 스킵</div><div class="compare-vals"><span class="c-after" id="c-skip">-</span></div></div>
+    </div>
+  </div>
+  <div class="card" style="background:var(--primary-light);box-shadow:none;border:2px solid #FFD0C0">
+    <p style="font-size:13px;color:#994422;line-height:1.7">🔬 이 연구는 숏폼 소비와 집중력의 관계를 분석합니다. 결과는 학술 보고서에 익명으로 활용될 예정이에요.</p>
+  </div>
+  <button class="btn btn-accent mt8" onclick="shareApp()">📢 친구에게 공유하기</button>
+  <p style="text-align:center;font-size:12px;color:var(--text-muted);margin-top:11px">더 많은 분들이 참여할수록 연구가 풍부해져요!</p>
+</div>
+
+<script>
+// ===== Amplitude =====
+const AMP_KEY = 'c98a708e539cd74e26aaf0d55c167fae';
+function getDevId() {
+  try {
+    let d = localStorage.getItem('_amp_did');
+    if (!d) { d = 'did_' + Math.random().toString(36).substr(2,12); localStorage.setItem('_amp_did', d); }
+    return d;
+  } catch(e) { return 'did_' + Math.random().toString(36).substr(2,12); }
+}
+const DEV_ID = getDevId();
+function amp(name, props) {
+  fetch('https://api2.amplitude.com/2/httpapi', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ api_key: AMP_KEY, events:[{ event_type:name, user_id:G.uuid, device_id:DEV_ID, time:Date.now(), event_properties:props||{}, user_properties:{age_group:G.ageGroup} }] })
+  }).catch(()=>{});
+}
+
+// ===== 전역 =====
+const G = {
+  uuid: 'u_'+Math.random().toString(36).substr(2,9)+'_'+Date.now(),
+  ageGroup:'', agreed:false,
+  phase:'pre', testIdx:0,
+  results:{ pre:{stroop:0,digit:0,reaction:{hits:0,misses:0}}, post:{stroop:0,digit:0,reaction:{hits:0,misses:0}} },
+  skipTimes:[], videoIdx:0, videoStart:0, vidTimer:null,
+  survey:{}, surveyAns:0, sliderInit:false
+};
+const VIDS = [
+  {url:'videos/video1.mp4',  dur:29},
+  {url:'videos/video2.mp4',  dur:8},
+  {url:'videos/video3.mp4',  dur:30},
+  {url:'videos/video4.mp4',  dur:22},
+  {url:'videos/video5.mp4',  dur:31},
+  {url:'videos/video6.mp4',  dur:14},
+  {url:'videos/video7.mp4',  dur:19},
+  {url:'videos/video8.mp4',  dur:13},
+  {url:'videos/video9.mp4',  dur:8},
+  {url:'videos/video10.mp4', dur:9},
+  {url:'videos/video11.mp4', dur:24},
+  {url:'videos/video12.mp4', dur:22},
+];
+
+// ===== 인트로 =====
+function toggleAgree(e) { if(e) e.stopPropagation(); const c=document.getElementById('agree-check'); c.checked=!c.checked; G.agreed=c.checked; chkReady(); }
+function selectAge(el,age) { document.querySelectorAll('.age-btn').forEach(b=>b.classList.remove('selected')); el.classList.add('selected'); G.ageGroup=age; chkReady(); }
+function chkReady() { document.getElementById('start-btn').disabled=!(G.agreed&&G.ageGroup); }
+function startApp() { amp('experiment_started',{age_group:G.ageGroup}); G.phase='pre'; G.testIdx=0; showHub(); }
+
+// ===== 허브 =====
+const T_NAMES=['스트루프 테스트','숫자 거꾸로 세기','반응속도 테스트'];
+const T_SUBS=['글자의 색깔을 빠르게 선택하는 테스트예요 (5문제, 문제당 2초)','숫자 6개를 기억하고 거꾸로 입력하는 테스트예요 (2회)','화면에 나타나는 원을 최대한 빠르게 터치하는 테스트예요 (10초)'];
+function showHub() {
+  const pre=G.phase==='pre';
+  document.getElementById('hub-prog').style.width=(pre?15:62)+'%';
+  document.getElementById('hub-pill').textContent=pre?'2/7':'5/7';
+  const b=document.getElementById('hub-badge');
+  b.textContent=pre?'사전 집중력 테스트':'사후 집중력 테스트';
+  b.className='phase-badge '+(pre?'phase-pre':'phase-post');
+  document.getElementById('hub-title').textContent=T_NAMES[G.testIdx];
+  document.getElementById('hub-sub').textContent=T_SUBS[G.testIdx];
+  document.getElementById('hub-stroop-tip').style.display=G.testIdx===0?'block':'none';
+  document.getElementById('hub-digit-tip').style.display=G.testIdx===1?'block':'none';
+  for(let i=0;i<3;i++){
+    const d=document.getElementById('td'+i);
+    d.className='tdot'+(i<G.testIdx?' done':i===G.testIdx?' active':'');
+  }
+  showScreen('s-hub');
+}
+function startCurrentTest() { [startStroop,startDigit,startReact][G.testIdx](); }
+function finishTest() {
+  G.testIdx++;
+  if(G.testIdx<3){ showHub(); }
+  else if(G.phase==='pre'){ startVideoPhase(); }
+  else{ showScreen('s-survey'); updateSlider(5); }
+}
+
+// ===== 스트루프 =====
+const COLORS=[{n:'빨강',c:'#EF4444'},{n:'파랑',c:'#3B82F6'},{n:'초록',c:'#10B981'},{n:'노랑',c:'#F59E0B'}];
+let ST={qs:[],idx:0,correct:0,timer:null,done:false};
+
+function makeStroopQs() {
+  return Array.from({length:5},()=>{
+    const word=COLORS[Math.random()*4|0];
+    let ink; do{ink=COLORS[Math.random()*4|0];}while(ink===word);
+    let opts=[...COLORS].sort(()=>Math.random()-.5).slice(0,4);
+    if(!opts.find(o=>o.n===ink.n)) opts[Math.random()*4|0]=ink;
+    return {word:word.n, ink, choices:opts.sort(()=>Math.random()-.5)};
+  });
+}
+function startStroop() {
+  const pre=G.phase==='pre';
+  document.getElementById('stroop-pill').textContent=pre?'2/7':'5/7';
+  const b=document.getElementById('stroop-badge');
+  b.textContent=pre?'사전 테스트 1/3':'사후 테스트 1/3';
+  b.className='phase-badge '+(pre?'phase-pre':'phase-post');
+  ['stroop-inst','sprogress','stroop-word','stroop-q'].forEach(id=>document.getElementById(id).style.display='');
+  document.querySelector('.stimer-bar').style.display='';
+  document.getElementById('stroop-choices').style.display='grid';
+  document.getElementById('stroop-done').style.display='none';
+  ST={qs:makeStroopQs(),idx:0,correct:0,timer:null,done:false};
+  showScreen('s-stroop'); showStroopQ();
+}
+function showStroopQ() {
+  const q=ST.qs[ST.idx]; ST.done=false;
+  document.getElementById('sprogress').textContent=(ST.idx+1)+' / 5';
+  const w=document.getElementById('stroop-word'); w.textContent=q.word; w.style.color=q.ink.c;
+  const ch=document.getElementById('stroop-choices'); ch.innerHTML='';
+  q.choices.forEach(col=>{
+    const b=document.createElement('button'); b.className='sc-btn'; b.textContent=col.n; b.style.color=col.c;
+    b.onclick=()=>ansStroop(col.n===q.ink.n,b);
+    ch.appendChild(b);
+  });
+  let el=0; clearInterval(ST.timer);
+  document.getElementById('stimer-fill').style.width='100%';
+  ST.timer=setInterval(()=>{
+    el+=100;
+    document.getElementById('stimer-fill').style.width=Math.max(0,100-el/20)+'%';
+    if(el>=2000&&!ST.done) ansStroop(false,null,true);
+  },100);
+}
+function ansStroop(ok,btn,timeout=false) {
+  if(ST.done) return; ST.done=true; clearInterval(ST.timer);
+  if(ok) ST.correct++;
+  if(btn) {
+    btn.classList.add(ok?'correct':'wrong');
+    if(!ok){
+      const q=ST.qs[ST.idx];
+      Array.from(document.getElementById('stroop-choices').children).forEach(b=>{ if(b.textContent===q.ink.n) b.classList.add('correct'); });
+    }
+  }
+  setTimeout(()=>{ ST.idx++; ST.idx<5?showStroopQ():doneStroop(); }, timeout?300:600);
+}
+function doneStroop() {
+  document.getElementById('stroop-choices').style.display='none';
+  ['stroop-inst','sprogress','stroop-word','stroop-q'].forEach(id=>document.getElementById(id).style.display='none');
+  document.querySelector('.stimer-bar').style.display='none';
+  document.getElementById('stroop-score').textContent=ST.correct+'/5';
+  document.getElementById('stroop-done').style.display='block';
+  G.results[G.phase].stroop=ST.correct;
+  amp('stroop_completed',{phase:G.phase,correct:ST.correct,total:5});
+}
+
+// ===== 숫자 거꾸로 =====
+let DG={round:0,seqs:[],correct:0,cursor:0,input:[],cdTimer:null};
+function genSeq(){return Array.from({length:6},()=>Math.floor(Math.random()*10));}
+function startDigit() {
+  const pre=G.phase==='pre';
+  document.getElementById('digit-pill').textContent=pre?'2/7':'5/7';
+  const b=document.getElementById('digit-badge');
+  b.textContent=pre?'사전 테스트 2/3':'사후 테스트 2/3';
+  b.className='phase-badge '+(pre?'phase-pre':'phase-post');
+  DG={round:0,seqs:[genSeq(),genSeq()],correct:0,cursor:0,input:[],cdTimer:null};
+  document.getElementById('digit-done').style.display='none';
+  showScreen('s-digit'); showDigitRound();
+}
+function showDigitRound() {
+  const seq=DG.seqs[DG.round]; DG.input=new Array(6).fill(''); DG.cursor=0;
+  document.getElementById('round-badge').textContent=(DG.round+1)+' / 2 라운드';
+  document.getElementById('digit-memo').style.display='block';
+  document.getElementById('digit-input').style.display='none';
+  document.getElementById('digit-display').textContent=seq.join('  ');
+  let t=3; document.getElementById('digit-cd').textContent=t;
+  clearInterval(DG.cdTimer);
+  DG.cdTimer=setInterval(()=>{ t--; document.getElementById('digit-cd').textContent=t; if(t<=0){clearInterval(DG.cdTimer);showDigitInput(seq);} },1000);
+}
+function showDigitInput(seq) {
+  document.getElementById('digit-memo').style.display='none';
+  document.getElementById('digit-input').style.display='block';
+  const row=document.getElementById('digit-row'); row.innerHTML='';
+  for(let i=0;i<6;i++){
+    const b=document.createElement('div'); b.className='dbox'; b.id='db'+i; row.appendChild(b);
+  }
+  const np=document.getElementById('numpad'); np.innerHTML='';
+  ['1','2','3','4','5','6','7','8','9','←','0','→'].forEach(k=>{
+    const b=document.createElement('button'); b.className='np-btn'+(k==='←'?' del':'');
+    b.textContent=k; b.onclick=()=>npPress(k,seq); np.appendChild(b);
+  });
+  renderDigitBoxes();
+}
+function npPress(k,seq) {
+  if(k==='←'){ if(DG.cursor>0){DG.cursor--;DG.input[DG.cursor]='';} }
+  else if(k==='→'){ if(DG.cursor<5)DG.cursor++; }
+  else{ if(DG.cursor<6){DG.input[DG.cursor]=k;DG.cursor++;} }
+  renderDigitBoxes();
+}
+function renderDigitBoxes() {
+  for(let i=0;i<6;i++){
+    const b=document.getElementById('db'+i); if(!b) continue;
+    b.textContent=DG.input[i]||'';
+    b.style.borderColor=i===DG.cursor?'var(--primary)':'var(--border)';
+    b.style.background=i===DG.cursor?'var(--primary-light)':'var(--surface)';
+  }
+}
+function submitDigit() {
+  const seq=DG.seqs[DG.round]; const rev=[...seq].reverse(); let rc=0;
+  for(let i=0;i<6;i++) if(DG.input[i]===String(rev[i])) rc++;
+  DG.correct+=rc; DG.cursor=0;
+  amp('digit_round',{phase:G.phase,round:DG.round+1,correct:rc,input:DG.input.join(''),answer:rev.join('')});
+  DG.round++;
+  if(DG.round<2){ showDigitRound(); }
+  else{
+    document.getElementById('digit-input').style.display='none';
+    document.getElementById('digit-total').textContent=DG.correct+'/12';
+    document.getElementById('digit-done').style.display='block';
+    G.results[G.phase].digit=DG.correct;
+    amp('digit_completed',{phase:G.phase,total_correct:DG.correct});
+  }
+}
+
+// ===== 반응속도 =====
+let RT={hits:0,misses:0,time:10,mainT:null,spawnT:null,on:false,spawnCount:0};
+function startReact() {
+  const pre=G.phase==='pre';
+  document.getElementById('react-pill').textContent=pre?'2/7':'5/7';
+  const b=document.getElementById('react-badge');
+  b.textContent=pre?'사전 테스트 3/3':'사후 테스트 3/3';
+  b.className='phase-badge '+(pre?'phase-pre':'phase-post');
+  RT={hits:0,misses:0,time:10,mainT:null,spawnT:null,on:false};
+  ['r-hit','r-miss'].forEach(id=>document.getElementById(id).textContent='0');
+  document.getElementById('r-time').textContent='10';
+  document.getElementById('rtimer-fill').style.width='100%';
+  document.getElementById('r-cd').style.display='flex';
+  document.getElementById('react-done').style.display='none';
+  document.getElementById('react-area').querySelectorAll('.rtarget').forEach(t=>t.remove());
+  showScreen('s-react'); doCountdown(3);
+}
+function doCountdown(n) {
+  const el=document.getElementById('r-cd-num'); el.textContent=n;
+  el.style.animation='none'; void el.offsetWidth; el.style.animation='countPop 1s ease';
+  if(n>0) setTimeout(()=>doCountdown(n-1),1000);
+  else{ document.getElementById('r-cd').style.display='none'; runReact(); }
+}
+function runReact() {
+  RT.on=true; RT.time=10;
+  RT.mainT=setInterval(()=>{
+    RT.time--; document.getElementById('r-time').textContent=RT.time;
+    document.getElementById('rtimer-fill').style.width=(RT.time/10*100)+'%';
+    if(RT.time<=0) endReact();
+  },1000);
+  doSpawn();
+}
+function doSpawn() {
+  if(!RT.on) return;
+  if(RT.spawnCount>=18) return;
+  const delay=400+Math.random()*300;
+  RT.spawnT=setTimeout(()=>{ spawnTarget(); doSpawn(); },delay);
+}
+const TC=['#FF6B35','#3B82F6','#10B981','#F59E0B','#EC4899'];
+function spawnTarget() {
+  if(!RT.on) return;
+  RT.spawnCount++;
+  const area=document.getElementById('react-area');
+  const aW=area.clientWidth, aH=area.clientHeight;
+  const sizes=[44,52,60,68]; const r=sizes[Math.random()*sizes.length|0];
+  const t=document.createElement('div'); t.className='rtarget';
+  t.style.width=t.style.height=r+'px';
+  t.style.background=TC[Math.random()*TC.length|0];
+  const x=r/2+Math.random()*(aW-r), y=r/2+Math.random()*(aH-r);
+  t.style.left=(x-r/2)+'px'; t.style.top=(y-r/2)+'px';
+  t.innerHTML='<div class="rtarget-inner"></div>';
+  t.addEventListener('pointerdown',e=>{
+    e.preventDefault(); if(!RT.on) return;
+    RT.hits++; document.getElementById('r-hit').textContent=RT.hits; t.remove();
+  });
+  area.appendChild(t);
+  setTimeout(()=>{ if(t.parentNode&&RT.on){ RT.misses++; document.getElementById('r-miss').textContent=RT.misses; t.style.opacity='.25'; setTimeout(()=>t.remove(),150); } },900);
+}
+function endReact() {
+  RT.on=false; clearInterval(RT.mainT); clearTimeout(RT.spawnT);
+  document.getElementById('react-area').querySelectorAll('.rtarget').forEach(t=>t.remove());
+  const total=RT.hits+RT.misses;
+  document.getElementById('r-done-hit').textContent=RT.hits;
+  document.getElementById('r-done-total').textContent=total;
+  const rd=document.getElementById('react-done'); rd.style.display='flex';
+  G.results[G.phase].reaction={hits:RT.hits,misses:RT.misses};
+  amp('reaction_completed',{phase:G.phase,hits:RT.hits,misses:RT.misses,total,accuracy:total>0?Math.round(RT.hits/total*100):0});
+}
+
+// ===== 영상 =====
+function startVideoPhase() {
+  G.skipTimes=[]; G.videoIdx=0;
+  showScreen('s-video'); amp('video_phase_started',{});
+  loadVideo(0);
+}
+function loadVideo(idx) {
+  if(idx>=VIDS.length){ endVideoPhase(); return; }
+  G.videoIdx=idx;
+  const vid=document.getElementById('main-video');
+  document.getElementById('vid-loading').style.display='flex'; vid.style.display='none';
+  vid.src=VIDS[idx].url; vid.load();
+  document.getElementById('vid-badge').textContent=(idx+1)+' / '+VIDS.length;
+  document.getElementById('vid-prog-bar').style.width=(idx/VIDS.length*100)+'%';
+  document.getElementById('vid-pfill').style.width='0%';
+}
+function onVideoReady() {
+  const vid=document.getElementById('main-video');
+  document.getElementById('vid-loading').style.display='none'; vid.style.display='block';
+  vid.play().catch(()=>{});
+  G.videoStart=Date.now(); clearInterval(G.vidTimer);
+  G.vidTimer=setInterval(()=>{
+    const el=(Date.now()-G.videoStart)/1000;
+    const dur=vid.duration||VIDS[G.videoIdx].dur;
+    document.getElementById('vid-pfill').style.width=Math.min(el/dur*100,100)+'%';
+    if(el>=dur) skipVideo(true);
+  },200);
+}
+function skipVideo(auto=false) {
+  clearInterval(G.vidTimer);
+  const st=Math.round((Date.now()-G.videoStart)/100)/10;
+  const dur=VIDS[G.videoIdx].dur; const sk=Math.min(st,dur);
+  G.skipTimes.push(sk);
+  amp('video_skipped',{video_index:G.videoIdx+1,video_duration:dur,skip_time_sec:sk,auto_ended:auto,skip_ratio:Math.round(sk/dur*100)});
+  loadVideo(G.videoIdx+1);
+}
+function endVideoPhase() {
+  const avg=G.skipTimes.length?Math.round(G.skipTimes.reduce((a,b)=>a+b,0)/G.skipTimes.length*10)/10:0;
+  amp('video_phase_completed',{avg_skip_time:avg,skip_times:G.skipTimes});
+  G.phase='post'; G.testIdx=0; showHub();
+}
+
+// ===== 설문 =====
+function pick(q,el,v) {
+  const c=document.getElementById(q); const was=el.classList.contains('selected');
+  c.querySelectorAll('.choice-btn').forEach(b=>b.classList.remove('selected'));
+  if(!was){ el.classList.add('selected'); const p=!!G.survey[q]; G.survey[q]=v; if(!p){G.surveyAns++;updSP();} }
+  else{ delete G.survey[q]; G.surveyAns--; updSP(); }
+}
+function lk(q,el,v) {
+  const c=document.getElementById(q); c.querySelectorAll('.likert-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected'); const p=!!G.survey[q]; G.survey[q]=v; if(!p){G.surveyAns++;updSP();}
+}
+function updateSlider(v) {
+  v=parseInt(v); G.survey.q10=v;
+  document.getElementById('slider-val').innerHTML=v+' <span>/ 10점</span>';
+  const ds=['전혀 중독 아님 😊','거의 안 중독','조금 중독된 것 같기도','약간 신경 쓰임','중간 정도','중간 정도','좀 많이 보는 것 같음','꽤 중독된 것 같음','많이 중독됨','심각하게 중독','완전 중독 😅'];
+  const cs=['#10B981','#10B981','#6EE7B7','#A3E635','#FCD34D','#FCD34D','#FB923C','#F97316','#EF4444','#DC2626','#DC2626'];
+  const d=document.getElementById('slider-desc'); d.textContent=ds[v]||''; d.style.background=cs[v]+'22'; d.style.color=cs[v];
+  if(!G.sliderInit){G.sliderInit=true;G.surveyAns++;updSP();}
+}
+function updSP() { const r=14; document.getElementById('survey-prog').style.width=Math.round(Math.min(G.surveyAns,r)/r*100)+'%'; }
+function submitSurvey() {
+  const req=['q1','q2','q3','q4','q5','q6','q7','q8','q9','q11','q12','q13','q14'];
+  if(req.some(q=>!G.survey[q])){ showToast('아직 답하지 않은 문항이 있어요 😊'); return; }
+  const pre=G.results.pre, post=G.results.post;
+  const avg=G.skipTimes.length?Math.round(G.skipTimes.reduce((a,b)=>a+b,0)/G.skipTimes.length*10)/10:0;
+
+  // ===== 집중력 점수 계산 (10점 만점) =====
+  // 스트루프: 전→후 변화 (각 5점 만점, 향상/유지 = 좋음)
+  const stroopDiff = (post.stroop||0) - (pre.stroop||0);
+  const stroopBase = post.stroop||0;
+  // 숫자: 전→후 변화 (각 12점 만점)
+  const digitDiff = (post.digit||0) - (pre.digit||0);
+  const digitBase = post.digit||0;
+  // 반응: 전→후 변화
+  const reactDiff = (post.reaction.hits||0) - (pre.reaction.hits||0);
+  const reactBase = post.reaction.hits||0;
+  const reactTotal = (post.reaction.hits||0) + (post.reaction.misses||0);
+
+  // 각 테스트 점수 (0~10)
+  // 스트루프: 사후 정답률 기반 (5점=10점, 4점=8점 ...) + 향상 보너스
+  let sScore = (stroopBase / 5) * 7 + Math.min(Math.max(stroopDiff * 1.5, -2), 3);
+  // 숫자: 사후 점수 기반 (12점=10점) + 향상 보너스
+  let dScore = (digitBase / 12) * 7 + Math.min(Math.max(digitDiff * 0.5, -2), 3);
+  // 반응: 사후 정확도 기반 + 향상 보너스
+  let rScore = (reactTotal > 0 ? (reactBase / reactTotal) : 0) * 7 + Math.min(Math.max(reactDiff * 0.5, -2), 3);
+
+  // 평균 내고 0~10 클램프
+  const rawScore = (sScore + dScore + rScore) / 3;
+  const finalScore = Math.min(10, Math.max(0, Math.round(rawScore * 10) / 10));
+
+  const grades = [
+    {min:9, emoji:'🏆', label:'집중력 최상위!', desc:'숏폼 시청 후에도 집중력이 거의 흔들리지 않았어요.'},
+    {min:7, emoji:'😊', label:'집중력 우수', desc:'전반적으로 높은 집중력을 유지했어요.'},
+    {min:5, emoji:'🙂', label:'집중력 보통', desc:'평균적인 집중력 수준이에요.'},
+    {min:3, emoji:'😅', label:'집중력 저하 감지', desc:'숏폼 시청 후 집중력이 다소 떨어졌어요.'},
+    {min:0, emoji:'😵', label:'집중력 많이 저하', desc:'숏폼 시청이 집중력에 큰 영향을 준 것 같아요.'},
+  ];
+  const g = grades.find(g => finalScore >= g.min);
+
+  document.getElementById('focus-score').textContent = finalScore.toFixed(1);
+  document.getElementById('focus-grade').textContent = g.emoji + ' ' + g.label;
+  document.getElementById('focus-desc').textContent = g.desc;
+
+  const payload = {
+    pre_stroop:pre.stroop, post_stroop:post.stroop,
+    pre_digit:pre.digit, post_digit:post.digit,
+    pre_react_hits:pre.reaction.hits, post_react_hits:post.reaction.hits,
+    pre_react_misses:pre.reaction.misses, post_react_misses:post.reaction.misses,
+    focus_score: finalScore,
+    avg_skip_time:avg, skip_times:G.skipTimes,
+    ...Object.fromEntries(['q1','q2','q3','q4','q5','q6','q7','q8','q9','q10','q11','q12','q13','q14','q15'].map(q=>[q,G.survey[q]||null])),
+    age_group:G.ageGroup, uuid:G.uuid, timestamp:new Date().toISOString()
+  };
+
+  // Amplitude 전송
+  amp('survey_completed', payload);
+
+  // Google Sheets 전송
+  const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxho0Y8iNOqMbfbPgFoLTQkAceLRGj_oCMDezJhh20JscxHVyQ_Uk7nPZ4wmytfn8Ax/exec';
+  fetch(SHEET_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify(payload)
+  }).catch(()=>{});
+  document.getElementById('cs-pre').textContent=(pre.stroop??'-')+'/5';
+  document.getElementById('cs-post').textContent=(post.stroop??'-')+'/5';
+  document.getElementById('cd-pre').textContent=(pre.digit??'-')+'/12';
+  document.getElementById('cd-post').textContent=(post.digit??'-')+'/12';
+  document.getElementById('cr-pre').textContent=(pre.reaction.hits??'-')+'회';
+  document.getElementById('cr-post').textContent=(post.reaction.hits??'-')+'회';
+  document.getElementById('c-skip').textContent=avg+'초';
+  showScreen('s-done');
+}
+
+// ===== 공유 =====
+function shareApp() {
+  if(navigator.share) navigator.share({title:'숏폼과 집중력 연구',text:'내 숏폼 습관이 집중력에 영향을 주고 있을까? 12분이면 알 수 있어요!',url:location.href}).catch(()=>{});
+  else navigator.clipboard.writeText(location.href).then(()=>showToast('링크 복사됐어요! 친구에게 공유해주세요 😊')).catch(()=>{});
+}
+
+// ===== 유틸 =====
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); window.scrollTo(0,0); }
+function showToast(msg) { const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2800); }
+
+updateSlider(5);
+</script>
+</body>
+</html>
